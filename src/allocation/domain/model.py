@@ -2,6 +2,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Set
+from allocation.domain.model import OrderLine
+from . import commands, events
 
 
 class OutOfStock(Exception):
@@ -15,7 +17,27 @@ def allocate(line: OrderLine, batches: List[Batch]) -> str:
         return batch.reference
     except StopIteration:
         raise OutOfStock(f"Out of stock for sku {line.sku}")
+    
 
+class Product:
+
+    def __init__(self, sku: str, batches: List[Batch], version_number: int = 0):
+        self.sku = sku
+        self.batches = batches
+        self.version_number = version_number
+        self.events = []  # type: List[events.Event]
+
+    def allocate(self, line: OrderLine) -> str:
+        try:
+            batch = next(
+                b for b in sorted(self.batches) if b.can_allocate(line)
+            )
+            batch.allocate(line)
+            self.version_number += 1
+            return batch.reference
+        except StopIteration:
+            self.events.append(events.OutOfStock(line.sku))
+            return None
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
