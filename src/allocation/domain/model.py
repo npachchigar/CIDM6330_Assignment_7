@@ -2,9 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 from typing import Optional, List, Set
-from allocation.domain.model import OrderLine
-from . import commands, events
-
+from . import events
 
 class OutOfStock(Exception):
     pass
@@ -37,7 +35,7 @@ class Product:
             return batch.reference
         except StopIteration:
             self.events.append(events.OutOfStock(line.sku))
-            return None
+            
 
 @dataclass(unsafe_hash=True)
 class OrderLine:

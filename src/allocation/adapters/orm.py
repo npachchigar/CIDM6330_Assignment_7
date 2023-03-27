@@ -1,4 +1,4 @@
-from sqlalchemy import Table, MetaData, Column, Integer, String, Date, ForeignKey
+from sqlalchemy import (Table, MetaData, Column, Integer, String, Date, ForeignKey)
 from sqlalchemy.orm import registry, relationship
 
 from allocation.domain import model
